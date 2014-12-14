@@ -8,6 +8,9 @@
 FXOS8700CQ::FXOS8700CQ(byte addr)
 {
 	address = addr;
+	accelFSR = AFS_2g;     // Set the scale below either 2, 4 or 8
+	accelODR = AODR_200HZ; // In hybrid mode, accel/mag data sample rates are half of this value
+	magOSR = MOSR_5;     // Choose magnetometer oversample rate
 }
 
 // Writes a register
@@ -27,7 +30,7 @@ byte FXOS8700CQ::readReg(byte reg)
 	Wire.beginTransmission(address);
 	Wire.write(reg);
 	Wire.endTransmission();
-	Wire.requestFrom(address, (byte)1);
+	Wire.requestFrom(address, (uint8_t)1);
 	value = Wire.read();
 	Wire.endTransmission();
 
@@ -80,7 +83,7 @@ void FXOS8700CQ::readTempData()
 // It must be in standby for modifying most registers
 void FXOS8700CQ::standby()
 {
-	byte c = readReg(0x2A);
+	byte c = readReg(FXOS8700CQ_CTRL_REG1);
 	writeReg(FXOS8700CQ_CTRL_REG1, c & ~(0x01));
 }
 
@@ -88,7 +91,7 @@ void FXOS8700CQ::standby()
 // Needs to be in this mode to output data.
 void FXOS8700CQ::active()
 {
-	byte c = readReg(0x2A);
+	byte c = readReg(FXOS8700CQ_CTRL_REG1);
 	writeReg(FXOS8700CQ_CTRL_REG1, c | 0x01);
 }
 
@@ -98,14 +101,14 @@ void FXOS8700CQ::init()
 
 	// Configure the accelerometer
 	writeReg(FXOS8700CQ_XYZ_DATA_CFG, accelFSR);  // Choose the full scale range to 2, 4, or 8 g.
-	writeReg(FXOS8700CQ_CTRL_REG1, readReg(FXOS8700CQ_CTRL_REG1) & ~(0x38)); // Clear the 3 data rate bits 5:3
+	//writeReg(FXOS8700CQ_CTRL_REG1, readReg(FXOS8700CQ_CTRL_REG1) & ~(0x38)); // Clear the 3 data rate bits 5:3
 	if (accelODR <= 7) 
 		writeReg(FXOS8700CQ_CTRL_REG1, readReg(FXOS8700CQ_CTRL_REG1) | (accelODR << 3));      
-	writeReg(FXOS8700CQ_CTRL_REG2, readReg(FXOS8700CQ_CTRL_REG2) & ~(0x03)); // clear bits 0 and 1
-	writeReg(FXOS8700CQ_CTRL_REG2, readReg(FXOS8700CQ_CTRL_REG2) |  (0x02)); // select normal(00) or high resolution (10) mode
+	//writeReg(FXOS8700CQ_CTRL_REG2, readReg(FXOS8700CQ_CTRL_REG2) & ~(0x03)); // clear bits 0 and 1
+	//writeReg(FXOS8700CQ_CTRL_REG2, readReg(FXOS8700CQ_CTRL_REG2) |  (0x02)); // select normal(00) or high resolution (10) mode
 
 	// Configure the magnetometer
-	writeReg(FXOS8700CQ_M_CTRL_REG1, 0x80 | magOSR << 2 | 0x03); // Set auto-calibration, set oversampling, enable hybrid mode 
+	//writeReg(FXOS8700CQ_M_CTRL_REG1, 0x80 | magOSR << 2 | 0x03); // Set auto-calibration, set oversampling, enable hybrid mode 
 		                                     
 	// Configure interrupts 1 and 2
 	//writeReg(CTRL_REG3, readReg(CTRL_REG3) & ~(0x02)); // clear bits 0, 1 

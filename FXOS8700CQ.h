@@ -174,9 +174,9 @@ class FXOS8700CQ
 	int8_t tempData; // RAW temperature data
 
 	// Sensor configuration
-	uint8_t accelFSR = AFS_2g;     // Set the scale below either 2, 4 or 8
-	uint8_t accelODR = AODR_200HZ; // In hybrid mode, accel/mag data sample rates are half of this value
-	uint8_t   magOSR = MOSR_5;     // Choose magnetometer oversample rate
+	uint8_t accelFSR;
+	uint8_t accelODR;
+	uint8_t magOSR;
 
 	FXOS8700CQ(byte addr);
 
@@ -201,6 +201,7 @@ class FXOS8700CQ
 	float getMres(void);
 
 	private:
+	// Sensor address
 	byte address;
 };
 
